@@ -73,6 +73,10 @@ class SudoTicTacToeState(GameState[SudoAction]):
     """
     __slots__ = ("boards", "board_status", "_current_player", "forced_board")
 
+    # --- GameState required class variables ---
+    game_title: str = "Sudo Tic-Tac-Toe"
+
+    # --- Instance variables ---
     boards: List[List[int]]
     board_status: List[int]
     _current_player: int

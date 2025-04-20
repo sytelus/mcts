@@ -18,6 +18,10 @@ class TicTacToeState(GameState[TttAction]):
     """Represents the state of a standard Tic-Tac-Toe game."""
     __slots__ = ("board", "_current_player")
 
+    # --- GameState required class variables ---
+    game_title: str = "Standard Tic-Tac-Toe"
+
+    # --- Instance variables ---
     board: List[int]  # 0: empty, 1: X, -1: O
     _current_player: int
 

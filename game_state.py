@@ -12,6 +12,10 @@ class GameState(ABC, Generic[Action]):
     assumed to be represented by 1 and Player 2 by -1.
     """
 
+    # Use a class variable for the game title
+    # Subclasses MUST override this.
+    game_title: str = "Abstract Game (Please Override)"
+
     @property
     @abstractmethod
     def current_player(self) -> int:

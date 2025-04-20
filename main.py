@@ -4,7 +4,7 @@
 import sys
 import random
 import numpy as np
-from typing import Type, TypeVar, Generic # Import Generic
+from typing import Type, TypeVar, Generic, Dict, List
 
 # Project imports
 from game_state import GameState, Action as ActionType # ActionType alias
@@ -17,6 +17,15 @@ Action = TypeVar('Action')
 
 SIMULATIONS_PER_MOVE = 400 # MCTS simulation budget
 
+# --- Game Registry --- #
+# Discovered game state classes are registered here.
+# We explicitly import and list them for simplicity, but this could be automated
+# using metaclasses or module scanning for larger projects.
+AVAILABLE_GAMES: Dict[str, Type[GameState]] = {
+    TicTacToeState.game_title: TicTacToeState,
+    SudoTicTacToeState.game_title: SudoTicTacToeState
+}
+
 def _prompt_human_move(state: GameState[Action]) -> Action:
     """Ask the user for a move until a valid one is entered for the given game state."""
     print(state.get_action_prompt()) # Use the method from the state
@@ -24,12 +33,12 @@ def _prompt_human_move(state: GameState[Action]) -> Action:
         try:
             input_str = input("Your move> ").strip()
             action = state.parse_action(input_str) # Use the state's parser
-
-            # Check if the parsed action is actually legal in the current state
             legal_actions = state.get_legal_actions()
             if action in legal_actions:
                 return action
             else:
+                # Provide more helpful feedback about why move is illegal if possible
+                # This requires more specific logic in GameState or subclasses
                 print(f"Illegal move. Valid moves are: {legal_actions}")
                 print("Please try again.")
         except ValueError as e:
@@ -42,19 +51,23 @@ def _prompt_human_move(state: GameState[Action]) -> Action:
             sys.exit(0)
 
 def select_game() -> Type[GameState]:
-    """Prompts the user to select which game to play."""
+    """Prompts the user to select a game from the available registry."""
     print("Select game:")
-    print("  1: Standard Tic-Tac-Toe")
-    print("  2: Sudo Tic-Tac-Toe")
+    game_options: List[Type[GameState]] = list(AVAILABLE_GAMES.values())
+    for i, game_class in enumerate(game_options):
+        print(f"  {i+1}: {game_class.game_title}") # Use game_title property
+
     while True:
         try:
-            choice = input("Enter choice (1 or 2): ").strip()
-            if choice == '1':
-                return TicTacToeState # type: ignore[return-value]
-            elif choice == '2':
-                return SudoTicTacToeState # type: ignore[return-value]
+            choice_str = input(f"Enter choice (1-{len(game_options)}): ").strip()
+            choice_idx = int(choice_str) - 1
+            if 0 <= choice_idx < len(game_options):
+                # Return the selected GameState class
+                return game_options[choice_idx]
             else:
-                print("Invalid choice, please enter 1 or 2.")
+                print(f"Invalid choice, please enter a number between 1 and {len(game_options)}.")
+        except ValueError:
+            print("Invalid input. Please enter a number.")
         except EOFError:
             print("\nExiting setup.")
             sys.exit(0)
@@ -65,8 +78,9 @@ def select_game() -> Type[GameState]:
 def play_cli() -> None:
     """Main CLI loop for playing a selected game against MCTS AI."""
 
-    GameStateClass = select_game() # Type is Type[GameState], but known to be concrete
-    game_name = "Tic-Tac-Toe" if GameStateClass is TicTacToeState else "Sudo Tic-Tac-Toe"
+    GameStateClass = select_game()
+    # Get game name directly from the selected class property
+    game_name = GameStateClass.game_title
     print(f"\nWelcome to {game_name}!")
 
     print("Do you want to be X (player 1) and start? [y/N] ", end="")
@@ -77,7 +91,6 @@ def play_cli() -> None:
         return
 
     # Initialize the selected game state
-    # Suppress the constructor warning as we know GameStateClass is concrete
     state = GameStateClass(current_player=1) # type: ignore[call-arg]
 
     while True:
@@ -101,7 +114,7 @@ def play_cli() -> None:
         else:
             print(f"\nPlayer {current_player_name}'s turn (AI).")
             print("AI is thinking ...", file=sys.stderr)
-            # Create MCTS root node without explicit generic type - it infers from state
+            # MCTS node infers Action type from state
             root = MonteCarloTreeSearchNode(state=state)
             try:
                 action = root.best_action(simulations_number=SIMULATIONS_PER_MOVE)
@@ -111,9 +124,7 @@ def play_cli() -> None:
                  print("This might happen if the game state has no legal moves.")
                  break
 
-        # Apply the chosen action to get the next state
         try:
-            # The type of state is preserved across the move
             state = state.move(action)
         except ValueError as e:
             print(f"\nError applying move: {e}")
