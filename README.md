@@ -26,13 +26,17 @@ The core design utilizes abstract base classes (`GameState`, `SearchAlgorithm`) 
 
 ```
 .
-├── main.py                 # Main entry point, CLI logic, game/algorithm selection
-├── game_state.py           # Abstract Base Class (ABC) for game states
-├── tic_tac_toe.py          # Implementation of standard Tic-Tac-Toe (GameState subclass)
-├── sudo_tic_tac_toe.py     # Implementation of Sudo Tic-Tac-Toe (GameState subclass)
-├── search_algorithm.py     # Abstract Base Class (ABC) for search algorithms
-├── mcts.py                 # Monte Carlo Tree Search (MCTSAlgorithm and Node classes)
-├── brute_force_search.py   # Brute-Force Minimax (BruteForceSearch class)
+├── main.py                 # Main entry point, CLI logic
+├── games/                  # Package for game implementations
+│   ├── __init__.py
+│   ├── game_state.py       # Abstract Base Class (ABC) for game states
+│   ├── tic_tac_toe.py      # Standard Tic-Tac-Toe implementation
+│   └── sudo_tic_tac_toe.py # Sudo Tic-Tac-Toe implementation
+├── algorithms/             # Package for AI search algorithms
+│   ├── __init__.py
+│   ├── search_algorithm.py # Abstract Base Class (ABC) for search algorithms
+│   ├── mcts.py             # MCTS implementation
+│   └── brute_force_search.py # Brute-Force Minimax implementation
 └── README.md               # This file
 ```
 

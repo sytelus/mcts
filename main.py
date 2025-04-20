@@ -4,28 +4,29 @@
 import sys
 import random
 import numpy as np
+import math
 from typing import Type, TypeVar, Dict, List, Tuple
 
-# Project imports
-from game_state import GameState
-from search_algorithm import SearchAlgorithm         # Base class for search
-from mcts import MCTSAlgorithm                     # MCTS implementation
-from brute_force_search import BruteForceSearch    # BruteForce implementation
-from tic_tac_toe import TicTacToeState
-from sudo_tic_tac_toe import SudoTicTacToeState
+# Updated Project imports
+from games.game_state import GameState          # Base class for games
+from games.tic_tac_toe import TicTacToeState     # TicTacToe game
+from games.sudo_tic_tac_toe import SudoTicTacToeState # Sudo game
+
+from algorithms.search_algorithm import SearchAlgorithm # Base class for search
+from algorithms.mcts import MCTSAlgorithm              # MCTS implementation
+from algorithms.brute_force_search import BruteForceSearch # BruteForce implementation
 
 # SIMULATIONS_PER_MOVE = 400 # REMOVED - Now defined per game state class
 
 # --- Game Registry --- #
-# Discovered game state classes are registered here.
-# We explicitly import and list them for simplicity, but this could be automated
-# using metaclasses or module scanning for larger projects.
+# Uses imported classes from the games package
 AVAILABLE_GAMES: Dict[str, Type[GameState]] = {
     TicTacToeState.game_title: TicTacToeState,
     SudoTicTacToeState.game_title: SudoTicTacToeState
 }
 
 # --- Algorithm Registry --- #
+# Uses imported classes from the algorithms package
 AVAILABLE_ALGORITHMS: Dict[str, Type[SearchAlgorithm]] = {
     "MCTS": MCTSAlgorithm,
     "BruteForce (Minimax)": BruteForceSearch
@@ -144,10 +145,16 @@ def play_cli() -> None:
         print(state)
 
         if state.is_game_over():
-            result = state.game_result()
-            winner_map = {1: "X (Player 1)", -1: "O (Player 2)", 0: "Draw"}
+            result: float = state.game_result()
+            winner_str = "Unknown"
+            if math.isclose(result, 1.0):
+                winner_str = "X (Player 1)"
+            elif math.isclose(result, -1.0):
+                winner_str = "O (Player 2)"
+            elif math.isclose(result, 0.0):
+                winner_str = "Draw"
             print(f"\n===== GAME OVER =====")
-            print(f"Result: {winner_map.get(result, 'Unknown')}")
+            print(f"Result: {winner_str}")
             return
 
         current_player_name = "X" if state.current_player == 1 else "O"

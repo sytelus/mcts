@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Tuple, Optional
 
-from game_state import GameState
+# Import GameState from its new location
+from games.game_state import GameState
 
 class SearchAlgorithm(ABC):
     """Abstract Base Class for AI search algorithms.

@@ -2,7 +2,8 @@ from __future__ import annotations
 import copy
 from typing import List, Optional, Tuple, Any
 
-from game_state import GameState
+# Use relative import since game_state is now in the same directory
+from .game_state import GameState
 
 # Action for Tic-Tac-Toe is now a tuple containing the cell index
 TttAction = Tuple[int]
