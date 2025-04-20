@@ -10,8 +10,8 @@ https://ai-boson.github.io/mcts/.  It implements:
   expects (`get_legal_actions`, `move`, `is_game_over`, `game_result`).
 * The `MonteCarloTreeSearchNode` class exactly as in the article, but with full
   type hints and richer doc-strings.
-* A simple command-line interface that lets a human („X“) play against the MCTS
-  AI („O“) or watch two AIs play.  Adjust the constant `SIMULATIONS_PER_MOVE`
+* A simple command-line interface that lets a human (X) play against the MCTS
+  AI (O) or watch two AIs play.  Adjust the constant `SIMULATIONS_PER_MOVE`
   to trade playing strength for thinking time.
 
 Run:
