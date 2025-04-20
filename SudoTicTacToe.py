@@ -297,7 +297,7 @@ class MonteCarloTreeSearchNode:
             self.parent.backpropagate(result)
 
     def is_fully_expanded(self) -> bool:
-        return len(self._untried_actions) == 0
+        return len(self._untried_actions) == 0 # type: ignore[no-untyped-call]
 
     def best_child(self, c_param: float = math.sqrt(2)) -> "MonteCarloTreeSearchNode":
         choices_weights = [
