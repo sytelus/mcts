@@ -6,6 +6,7 @@ from typing import List, Optional, Sequence, Tuple, cast
 import numpy as np
 
 from game_state import GameState
+from search_algorithm import SearchAlgorithm # Import the base class
 
 class MonteCarloTreeSearchNode:
     """A node in the (game) search tree for Monte Carlo Tree Search.
@@ -163,3 +164,22 @@ class MonteCarloTreeSearchNode:
             raise RuntimeError("Best child node has no parent action.")
 
         return best.parent_action
+
+# New wrapper class implementing the SearchAlgorithm interface
+class MCTSAlgorithm(SearchAlgorithm):
+    """Wraps the MonteCarloTreeSearchNode's search logic."""
+
+    def __init__(self, simulations_per_move: int = 200, **kwargs) -> None:
+        """Initialize MCTS with the number of simulations per move."""
+        super().__init__(**kwargs)
+        if simulations_per_move <= 0:
+             raise ValueError("Simulations per move must be positive.")
+        self.simulations_per_move = simulations_per_move
+
+    def find_best_action(self, state: GameState) -> Tuple:
+        """Uses the MonteCarloTreeSearchNode's best_action method."""
+        # Create the root node
+        root = MonteCarloTreeSearchNode(state=state)
+        # Call the existing best_action method on the root node
+        # This preserves the exact MCTS logic from the user's context
+        return root.best_action(simulations_number=self.simulations_per_move)
