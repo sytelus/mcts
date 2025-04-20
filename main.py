@@ -163,7 +163,7 @@ def play_cli() -> None:
             print(f"\nPlayer {current_player_name}'s turn (AI - {algo_name}).")
             print("AI is thinking ...", file=sys.stderr)
             try:
-                action = search_algorithm.find_best_action(state)
+                action = search_algorithm.next_action(state)
                 print(f"AI plays {state.action_to_string(action)}")
             except (RuntimeError, ValueError) as e:
                  print(f"\nError during AI move: {e}")

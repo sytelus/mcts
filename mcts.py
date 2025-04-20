@@ -176,7 +176,7 @@ class MCTSAlgorithm(SearchAlgorithm):
              raise ValueError("Simulations per move must be positive.")
         self.simulations_per_move = simulations_per_move
 
-    def find_best_action(self, state: GameState) -> Tuple:
+    def next_action(self, state: GameState) -> Tuple:
         """Uses the MonteCarloTreeSearchNode's best_action method."""
         # Create the root node
         root = MonteCarloTreeSearchNode(state=state)

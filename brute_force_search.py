@@ -21,9 +21,8 @@ class BruteForceSearch(SearchAlgorithm):
         # Simple caching for minimax results (transposition table)
         self._cache: Dict[GameState, float] = {}
 
-
-    def find_best_action(self, state: GameState) -> Tuple:
-        """Find the best action using minimax search."""
+    def next_action(self, state: GameState) -> Tuple:
+        """Find the next action using minimax search."""
         if state.is_game_over():
             raise ValueError("Cannot find best action for a terminal state.")
 

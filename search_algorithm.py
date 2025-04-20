@@ -14,14 +14,14 @@ class SearchAlgorithm(ABC):
         pass
 
     @abstractmethod
-    def find_best_action(self, state: GameState) -> Tuple:
-        """Given a game state, return the best action determined by the algorithm.
+    def next_action(self, state: GameState) -> Tuple:
+        """Given a game state, return the next action determined by the algorithm.
 
         Args:
             state: The current GameState.
 
         Returns:
-            The best action (as a Tuple) found.
+            The next action (as a Tuple) found.
 
         Raises:
             RuntimeError: If no legal actions are available or search fails.
