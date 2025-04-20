@@ -4,16 +4,13 @@
 import sys
 import random
 import numpy as np
-from typing import Type, TypeVar, Generic, Dict, List
+from typing import Type, TypeVar, Dict, List, Tuple
 
 # Project imports
-from game_state import GameState, Action as ActionType # ActionType alias
+from game_state import GameState
 from mcts import MonteCarloTreeSearchNode
-from tic_tac_toe import TicTacToeState, TttAction     # Import standard TicTacToe
-from sudo_tic_tac_toe import SudoTicTacToeState, SudoAction # Import Sudo TicTacToe
-
-# Generic Action type bound for local use
-Action = TypeVar('Action')
+from tic_tac_toe import TicTacToeState
+from sudo_tic_tac_toe import SudoTicTacToeState
 
 # SIMULATIONS_PER_MOVE = 400 # REMOVED - Now defined per game state class
 
@@ -26,19 +23,17 @@ AVAILABLE_GAMES: Dict[str, Type[GameState]] = {
     SudoTicTacToeState.game_title: SudoTicTacToeState
 }
 
-def _prompt_human_move(state: GameState[Action]) -> Action:
+def _prompt_human_move(state: GameState) -> Tuple:
     """Ask the user for a move until a valid one is entered for the given game state."""
-    print(state.get_action_prompt()) # Use the method from the state
+    print(state.get_action_prompt())
     while True:
         try:
             input_str = input("Your move> ").strip()
-            action = state.parse_action(input_str) # Use the state's parser
+            action = state.parse_action(input_str)
             legal_actions = state.get_legal_actions()
             if action in legal_actions:
                 return action
             else:
-                # Provide more helpful feedback about why move is illegal if possible
-                # This requires more specific logic in GameState or subclasses
                 print(f"Illegal move. Valid moves are: {legal_actions}")
                 print("Please try again.")
         except ValueError as e:
@@ -55,14 +50,12 @@ def select_game() -> Type[GameState]:
     print("Select game:")
     game_options: List[Type[GameState]] = list(AVAILABLE_GAMES.values())
     for i, game_class in enumerate(game_options):
-        print(f"  {i+1}: {game_class.game_title}") # Use game_title property
-
+        print(f"  {i+1}: {game_class.game_title}")
     while True:
         try:
             choice_str = input(f"Enter choice (1-{len(game_options)}): ").strip()
             choice_idx = int(choice_str) - 1
             if 0 <= choice_idx < len(game_options):
-                # Return the selected GameState class
                 return game_options[choice_idx]
             else:
                 print(f"Invalid choice, please enter a number between 1 and {len(game_options)}.")
@@ -79,7 +72,6 @@ def play_cli() -> None:
     """Main CLI loop for playing a selected game against MCTS AI."""
 
     GameStateClass = select_game()
-    # Get game name directly from the selected class property
     game_name = GameStateClass.game_title
     print(f"\nWelcome to {game_name}!")
 
@@ -90,12 +82,11 @@ def play_cli() -> None:
         print("\nExiting setup.")
         return
 
-    # Initialize the selected game state
-    state = GameStateClass(current_player=1) # type: ignore[call-arg]
+    state: GameState = GameStateClass(current_player=1) # type: ignore[call-arg]
 
     while True:
         print("\nCurrent board state:")
-        print(state) # Uses state.__str__()
+        print(state)
 
         if state.is_game_over():
             result = state.game_result()
@@ -108,16 +99,15 @@ def play_cli() -> None:
         is_human_turn = (state.current_player == 1 and human_is_x) or \
                           (state.current_player == -1 and not human_is_x)
 
+        action: Tuple
         if is_human_turn:
             print(f"\nPlayer {current_player_name}'s turn (Human).")
             action = _prompt_human_move(state)
         else:
             print(f"\nPlayer {current_player_name}'s turn (AI).")
             print("AI is thinking ...", file=sys.stderr)
-            # MCTS node infers Action type from state
             root = MonteCarloTreeSearchNode(state=state)
             try:
-                # Get simulation count from the current state's class variable
                 num_sims = state.simulations_per_move
                 action = root.best_action(simulations_number=num_sims)
                 print(f"AI plays {state.action_to_string(action)}")
@@ -141,6 +131,6 @@ def play_cli() -> None:
 # -----------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    random.seed() # Seed for Python's random
-    np.random.seed() # Seed for NumPy's random (used by MCTS indirectly via np.argmax)
+    random.seed()
+    np.random.seed()
     play_cli()

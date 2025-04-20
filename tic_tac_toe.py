@@ -1,11 +1,11 @@
 from __future__ import annotations
 import copy
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Any
 
 from game_state import GameState
 
-# Action for Tic-Tac-Toe is simply the cell index (0-8)
-TttAction = int
+# Action for Tic-Tac-Toe is now a tuple containing the cell index
+TttAction = Tuple[int]
 
 # Pre-computed winning lines for a 3x3 board
 _WIN_LINES_TTT: Tuple[Tuple[int, int, int], ...] = (
@@ -14,8 +14,11 @@ _WIN_LINES_TTT: Tuple[Tuple[int, int, int], ...] = (
     (0, 4, 8), (2, 4, 6),             # diagonals
 )
 
-class TicTacToeState(GameState[TttAction]):
-    """Represents the state of a standard Tic-Tac-Toe game."""
+class TicTacToeState(GameState):
+    """Represents the state of a standard Tic-Tac-Toe game.
+
+    Action is represented as Tuple[int].
+    """
     __slots__ = ("board", "_current_player")
 
     # --- GameState required class variables ---
@@ -35,18 +38,22 @@ class TicTacToeState(GameState[TttAction]):
         return self._current_player
 
     def get_legal_actions(self) -> List[TttAction]:
-        """Return indices of empty cells."""
-        return [i for i, cell in enumerate(self.board) if cell == 0]
+        """Return indices of empty cells, wrapped in tuples."""
+        return [(i,) for i, cell in enumerate(self.board) if cell == 0]
 
     def move(self, action: TttAction) -> TicTacToeState:
-        """Place the current player's mark at the given cell index."""
-        if not (0 <= action <= 8):
-             raise ValueError("Action must be an integer between 0 and 8.")
-        if self.board[action] != 0:
+        """Place the current player's mark at the cell index from the action tuple."""
+        if not isinstance(action, tuple) or len(action) != 1:
+            raise ValueError("Action must be a tuple containing a single integer.")
+        cell_index = action[0]
+
+        if not (0 <= cell_index <= 8):
+             raise ValueError("Action cell index must be between 0 and 8.")
+        if self.board[cell_index] != 0:
             raise ValueError("Illegal move: cell already occupied.")
 
         new_board = self.board.copy()
-        new_board[action] = self.current_player
+        new_board[cell_index] = self.current_player
         return TicTacToeState(board=new_board, current_player=-self.current_player)
 
     def _check_win(self) -> int:
@@ -70,9 +77,11 @@ class TicTacToeState(GameState[TttAction]):
         return 0 # Game not finished (technically shouldn't be called if not is_game_over)
 
     def __str__(self) -> str:
-        symbols = {1: "X", -1: "O", 0: "·"}
+        """Display board using cell indices 0-8 for empty cells."""
+        symbols = {1: "X", -1: "O"}
         rows = []
         for i in range(0, 9, 3):
+            # Show index for empty cells
             row_cells = [symbols.get(self.board[j], str(j)) for j in range(i, i + 3)]
             rows.append(" ".join(row_cells))
         return "\n".join(rows)
@@ -92,12 +101,13 @@ class TicTacToeState(GameState[TttAction]):
 
     def parse_action(self, input_str: str) -> TttAction:
         try:
-            action = int(input_str.strip())
-            if not (0 <= action <= 8):
+            cell_index = int(input_str.strip())
+            if not (0 <= cell_index <= 8):
                 raise ValueError("Cell number must be between 0 and 8.")
-            return action
+            return (cell_index,) # Return as a tuple
         except (ValueError, TypeError) as e:
             raise ValueError(f"Invalid input: {e}") from e
 
     def action_to_string(self, action: TttAction) -> str:
-        return f"cell {action}"
+        # Extract cell index from tuple for display
+        return f"cell {action[0]}"

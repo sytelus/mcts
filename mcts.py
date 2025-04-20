@@ -1,42 +1,37 @@
 import math
 import random
 from collections import defaultdict
-from typing import List, Optional, Sequence, TypeVar, Generic, cast
+from typing import List, Optional, Sequence, Tuple, cast
 
 import numpy as np
 
-from game_state import GameState, Action as ActionType  # Use ActionType alias
+from game_state import GameState
 
-# Generic action type from GameState
-Action = TypeVar('Action')
-
-class MonteCarloTreeSearchNode(Generic[Action]):
+class MonteCarloTreeSearchNode:
     """A node in the (game) search tree for Monte Carlo Tree Search.
 
-    This class is generic and works with any game state that implements
-    the GameState interface.
+    Works with GameState where Action is Tuple.
     """
 
     def __init__(
         self,
-        state: GameState[Action],
-        # Explicitly use the class type for parent/children
-        parent: Optional['MonteCarloTreeSearchNode[Action]'] = None,
-        parent_action: Optional[Action] = None,
+        state: GameState,
+        parent: Optional['MonteCarloTreeSearchNode'] = None,
+        parent_action: Optional[Tuple] = None,
     ) -> None:
-        self.state: GameState[Action] = state
-        self.parent: Optional['MonteCarloTreeSearchNode[Action]'] = parent
-        self.parent_action: Optional[Action] = parent_action
-        self.children: List['MonteCarloTreeSearchNode[Action]'] = []
+        self.state: GameState = state
+        self.parent: Optional['MonteCarloTreeSearchNode'] = parent
+        self.parent_action: Optional[Tuple] = parent_action
+        self.children: List['MonteCarloTreeSearchNode'] = []
         self._number_of_visits: int = 0
         self._results: defaultdict[int, int] = defaultdict(int)
 
         # Initialize results for player 1 and player -1
         self._results[1] = 0
         self._results[-1] = 0
-        self._untried_actions: Optional[List[Action]] = None # Lazy initialization
+        self._untried_actions: Optional[List[Tuple]] = None # Lazy initialization
 
-    def get_untried_actions(self) -> List[Action]:
+    def get_untried_actions(self) -> List[Tuple]:
         """Lazily fetch and store untried actions."""
         if self._untried_actions is None:
             self._untried_actions = self.state.get_legal_actions()
@@ -65,10 +60,10 @@ class MonteCarloTreeSearchNode(Generic[Action]):
     # Tree expansion / traversal helpers
     # ------------------------------------------------------------------
 
-    def expand(self) -> 'MonteCarloTreeSearchNode[Action]':
+    def expand(self) -> 'MonteCarloTreeSearchNode':
         """Expand the tree by adding a new child node for an untried action."""
         untried = self.get_untried_actions()
-        action = untried.pop()
+        action: Tuple = untried.pop()
         next_state = self.state.move(action)
         # Create the child node using the same class
         child_node = self.__class__(next_state, parent=self, parent_action=action)
@@ -83,12 +78,12 @@ class MonteCarloTreeSearchNode(Generic[Action]):
         """Simulate a random playout from the current state to a terminal state."""
         current_rollout_state = self.state
         while not current_rollout_state.is_game_over():
-            possible_moves = current_rollout_state.get_legal_actions()
-            action = self.rollout_policy(possible_moves)
+            possible_moves: List[Tuple] = current_rollout_state.get_legal_actions()
+            action: Tuple = self.rollout_policy(possible_moves)
             current_rollout_state = current_rollout_state.move(action)
         return current_rollout_state.game_result() # Result is from player 1's perspective
 
-    def rollout_policy(self, possible_moves: Sequence[Action]) -> Action:
+    def rollout_policy(self, possible_moves: Sequence[Tuple]) -> Tuple:
         """Select a move during the rollout phase (default: random)."""
         return random.choice(possible_moves)
 
@@ -104,7 +99,7 @@ class MonteCarloTreeSearchNode(Generic[Action]):
         """Check if all legal actions from this state have been explored."""
         return len(self.get_untried_actions()) == 0
 
-    def best_child(self, c_param: float = math.sqrt(2)) -> 'MonteCarloTreeSearchNode[Action]':
+    def best_child(self, c_param: float = math.sqrt(2)) -> 'MonteCarloTreeSearchNode':
         """Select the child node with the highest UCB1 score.
 
         Uses the UCB1 formula: q/n + c * sqrt(2 * log(N) / n),
@@ -112,7 +107,7 @@ class MonteCarloTreeSearchNode(Generic[Action]):
         """
         log_N = math.log(self.n())
         best_score = -float('inf')
-        best_node: Optional['MonteCarloTreeSearchNode[Action]'] = None
+        best_node: Optional['MonteCarloTreeSearchNode'] = None
 
         for child in self.children:
             # The q value should be from the perspective of the *parent* node's player.
@@ -133,7 +128,7 @@ class MonteCarloTreeSearchNode(Generic[Action]):
         # Return type is already NodeType, should be okay
         return best_node
 
-    def _tree_policy(self) -> 'MonteCarloTreeSearchNode[Action]':
+    def _tree_policy(self) -> 'MonteCarloTreeSearchNode':
         """Select or expand a node according to the tree policy (UCB1)."""
         current_node = self
         while not current_node.is_terminal_node():
@@ -143,7 +138,7 @@ class MonteCarloTreeSearchNode(Generic[Action]):
                 current_node = current_node.best_child()
         return current_node
 
-    def best_action(self, simulations_number: int = 200) -> Action:
+    def best_action(self, simulations_number: int = 200) -> Tuple:
         """Run MCTS simulations and return the best action found.
 
         Selects the action leading to the child node with the highest visit count.

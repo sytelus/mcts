@@ -1,10 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import TypeVar, Generic, List, Any, Optional
+from typing import List, Any, Optional, Tuple
 
-# Define a generic type for actions, specific to each game implementation
-Action = TypeVar('Action')
-
-class GameState(ABC, Generic[Action]):
+class GameState(ABC):
     """Abstract Base Class for a game state usable with MCTS.
 
     Defines the essential methods required by the MCTS algorithm
@@ -24,12 +21,12 @@ class GameState(ABC, Generic[Action]):
         pass
 
     @abstractmethod
-    def get_legal_actions(self) -> List[Action]:
+    def get_legal_actions(self) -> List[Tuple]:
         """Return a list of all valid actions for the current player."""
         pass
 
     @abstractmethod
-    def move(self, action: Action) -> 'GameState[Action]':
+    def move(self, action: Tuple) -> 'GameState':
         """Apply the given action and return the resulting game state.
 
         This method should return a *new* game state instance
@@ -76,7 +73,7 @@ class GameState(ABC, Generic[Action]):
         # Default implementation if not overridden
         return "Enter your move:"
 
-    def parse_action(self, input_str: str) -> Action:
+    def parse_action(self, input_str: str) -> Tuple:
         """Parse a string input from the user into a valid Action.
 
         Raises:
@@ -85,7 +82,7 @@ class GameState(ABC, Generic[Action]):
         # Default implementation - subclasses should override this
         raise NotImplementedError("Action parsing not implemented for this game state.")
 
-    def action_to_string(self, action: Action) -> str:
+    def action_to_string(self, action: Tuple) -> str:
         """Convert an action into a human-readable string (e.g., for AI moves)."""
         # Default implementation
         return str(action)

@@ -29,8 +29,8 @@ from typing import List, Optional, Sequence, Tuple
 import numpy as np
 
 # Local imports
-from game_state import GameState # Import the base class
-from mcts import MonteCarloTreeSearchNode # Import the MCTS engine
+from game_state import GameState
+from mcts import MonteCarloTreeSearchNode
 
 ###############################################################################
 # Game logic for Sudo Tic-Tac-Toe
@@ -51,7 +51,7 @@ def _is_local_win(board: Sequence[int], player: int) -> bool:
     """Return True if *player* has three in-a-row in *board*."""
     return any(all(board[i] == player for i in line) for line in _WIN_LINES)
 
-class SudoTicTacToeState(GameState[SudoAction]):
+class SudoTicTacToeState(GameState):
     """Complete game state for Sudo Tic-Tac-Toe, implementing GameState.
 
     A *local* 3x3 board is represented by a flat list of 9 integers:
@@ -123,7 +123,7 @@ class SudoTicTacToeState(GameState[SudoAction]):
                 legal.extend(empty_cells(b_idx))
         return legal
 
-    def move(self, action: SudoAction) -> 'SudoTicTacToeState':
+    def move(self, action: SudoAction) -> GameState:
         """Return a *new* state that results from applying `action`."""
         board_idx, cell_idx = action
 
