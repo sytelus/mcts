@@ -38,7 +38,7 @@ class TicTacToeState(GameState):
     def current_player(self) -> int:
         return self._current_player
 
-    def get_legal_actions(self) -> List[TttAction]:
+    def available_actions(self) -> List[TttAction]:
         """Return indices of empty cells, wrapped in tuples."""
         return [(i,) for i, cell in enumerate(self.board) if cell == 0]
 

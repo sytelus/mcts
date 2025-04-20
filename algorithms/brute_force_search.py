@@ -26,9 +26,9 @@ class BruteForceSearch(SearchAlgorithm):
         if state.is_game_over():
             raise ValueError("Cannot find best action for a terminal state.")
 
-        legal_actions = state.get_legal_actions()
-        if not legal_actions:
-            raise RuntimeError("No legal actions available from the current state.")
+        available_actions = state.available_actions()
+        if not available_actions:
+            raise RuntimeError("No available actions from the current state.")
 
         # Clear cache for each new top-level search
         self._cache = {}
@@ -37,7 +37,7 @@ class BruteForceSearch(SearchAlgorithm):
         best_score = -math.inf if state.current_player == 1 else math.inf
 
         # Evaluate each possible action
-        for action in legal_actions:
+        for action in available_actions:
             next_state = state.move(action)
             score = self._minimax(next_state, 0)
 
@@ -53,8 +53,8 @@ class BruteForceSearch(SearchAlgorithm):
 
         if best_action is None:
              # Fallback if no move improves the initial best_score (e.g., all moves lead to loss)
-             print("Warning: BruteForceSearch returning first legal action (no optimal found).", file=sys.stderr)
-             return legal_actions[0]
+             print("Warning: BruteForceSearch returning first available action (no optimal found).", file=sys.stderr)
+             return available_actions[0]
 
         return best_action
 
@@ -73,8 +73,8 @@ class BruteForceSearch(SearchAlgorithm):
             self._cache[state] = result # Cache terminal/depth-limited result
             return result
 
-        legal_actions = state.get_legal_actions()
-        if not legal_actions:
+        available_actions = state.available_actions()
+        if not available_actions:
             # No legal moves from non-terminal state? Treat as draw.
             self._cache[state] = 0.0
             return 0.0
@@ -82,14 +82,14 @@ class BruteForceSearch(SearchAlgorithm):
         # Recursive step
         if state.current_player == 1: # Maximizing player (X)
             max_score = -math.inf
-            for action in legal_actions:
+            for action in available_actions:
                 score = self._minimax(state.move(action), depth + 1)
                 max_score = max(max_score, score)
             self._cache[state] = max_score # Cache result
             return max_score
         else: # Minimizing player (O)
             min_score = math.inf
-            for action in legal_actions:
+            for action in available_actions:
                 score = self._minimax(state.move(action), depth + 1)
                 min_score = min(min_score, score)
             self._cache[state] = min_score # Cache result

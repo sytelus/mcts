@@ -113,7 +113,7 @@ class SudoTicTacToeState(GameState):
         return self._current_player
 
     # --- legal actions -------------------------------------------------- #
-    def get_legal_actions(self) -> List[SudoAction]:
+    def available_actions(self) -> List[SudoAction]:
         """Return all legal moves for the current player."""
 
         def _empty_cells(b_idx: int) -> List[SudoAction]:

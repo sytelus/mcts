@@ -21,7 +21,7 @@ class GameState(ABC):
         pass
 
     @abstractmethod
-    def get_legal_actions(self) -> List[Tuple]:
+    def available_actions(self) -> List[Tuple]:
         """Return a list of all valid actions for the current player."""
         pass
 

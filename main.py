@@ -39,11 +39,11 @@ def _prompt_human_move(state: GameState) -> Tuple:
         try:
             input_str = input("Your move> ").strip()
             action = state.parse_action(input_str)
-            legal_actions = state.get_legal_actions()
-            if action in legal_actions:
+            available_actions = state.available_actions()
+            if action in available_actions:
                 return action
             else:
-                print(f"Illegal move. Valid moves are: {legal_actions}")
+                print(f"Illegal move. Valid moves are: {available_actions}")
                 print("Please try again.")
         except ValueError as e:
             print(f"Invalid input: {e}. Please try again.")

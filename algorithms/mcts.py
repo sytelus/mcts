@@ -28,7 +28,7 @@ class MonteCarloTreeSearchNode:
 
     def get_untried_actions(self) -> List[Tuple]:
         if self._untried_actions is None:
-            self._untried_actions = self.state.get_legal_actions()
+            self._untried_actions = self.state.available_actions()
         return self._untried_actions
 
     def q(self) -> int:
@@ -53,10 +53,8 @@ class MonteCarloTreeSearchNode:
     def rollout(self) -> int:
         current_rollout_state = self.state
         while not current_rollout_state.is_game_over():
-            possible_moves: List[Tuple] = current_rollout_state.get_legal_actions()
-            # Handle case where rollout reaches a stuck state with no moves
+            possible_moves: List[Tuple] = current_rollout_state.available_actions()
             if not possible_moves:
-                # This shouldn't happen if is_game_over is correct, maybe treat as draw?
                 return 0
             action: Tuple = self.rollout_policy(possible_moves)
             current_rollout_state = current_rollout_state.move(action)
@@ -75,9 +73,7 @@ class MonteCarloTreeSearchNode:
         return len(self.get_untried_actions()) == 0
 
     def best_child(self, c_param: float = math.sqrt(2)) -> 'MonteCarloTreeSearchNode':
-        # Ensure parent has visits before calculating UCB
         if self.n() == 0:
-            # Should not happen if called after backpropagation from root
             raise ValueError("best_child called on node with zero visits.")
         log_N = math.log(self.n())
         best_score = -float('inf')
@@ -85,17 +81,14 @@ class MonteCarloTreeSearchNode:
         for child in self.children:
             child_n = child.n()
             if child_n == 0:
-                # Prioritize exploring unvisited children
                 ucb_score = float('inf')
             else:
                 q_perspective = child.q() * self.state.current_player
                 ucb_score = (q_perspective / child_n) + c_param * math.sqrt(2 * log_N / child_n)
-
             if ucb_score > best_score:
                 best_score = ucb_score
                 best_node = child
         if best_node is None:
-            # Can happen if self.children is empty
             raise ValueError("No children found to select best_child from.")
         return best_node
 
@@ -105,7 +98,6 @@ class MonteCarloTreeSearchNode:
             if not current_node.is_fully_expanded():
                 return current_node.expand()
             else:
-                # If fully expanded but no children (e.g., immediate draw/loss state)
                 if not current_node.children:
                     return current_node
                 current_node = current_node.best_child()
@@ -114,25 +106,19 @@ class MonteCarloTreeSearchNode:
     def best_action(self, simulations_number: int = 200) -> Tuple:
         if self.is_terminal_node():
              raise ValueError("best_action called on a terminal node")
-        legal_actions = self.state.get_legal_actions()
-        if not legal_actions:
-             raise RuntimeError("No legal actions available from the root state.")
-
-        # Handle case of 0 simulations requested
+        available_actions = self.state.available_actions()
+        if not available_actions:
+             raise RuntimeError("No available actions from the root state.")
         if simulations_number <= 0:
              print("Warning: MCTS best_action called with 0 simulations, returning random action.", file=sys.stderr)
-             return random.choice(legal_actions)
-
+             return random.choice(available_actions)
         for _ in range(simulations_number):
             v = self._tree_policy()
             reward = v.rollout()
             v.backpropagate(reward)
-
         if not self.children:
-             # Fallback if only one move possible which was terminal, or other rare cases
-             print("Warning: MCTS root has no children after simulations, returning first legal action.", file=sys.stderr)
-             return legal_actions[0]
-
+             print("Warning: MCTS root has no children after simulations, returning first available action.", file=sys.stderr)
+             return available_actions[0]
         best = max(self.children, key=lambda node: node.n())
         if best.parent_action is None:
             raise RuntimeError("Best child node has no parent action.")
