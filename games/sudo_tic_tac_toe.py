@@ -74,7 +74,7 @@ def _is_meta_win(board_status: Sequence[int], player: int) -> bool:
 
 
 class SudoTicTacToeState(GameState):
-    """Concrete `GameState` for Sudo / Ultimate Tic‑Tac‑Toe."""
+    """Concrete `GameState` for Sudo / Ultimate Tic‑Tac‑Toe."""
 
     __slots__ = ("boards", "board_status", "_current_player", "forced_board")
 
@@ -181,7 +181,7 @@ class SudoTicTacToeState(GameState):
 
     # --- terminal checks ------------------------------------------------ #
     def is_game_over(self) -> bool:
-        """Return ``True`` if the game is over (win or draw)."""
+        """Return ``True`` if the game is over (meta-win or draw)."""
         return (
             _is_meta_win(self.board_status, 1)
             or _is_meta_win(self.board_status, -1)
@@ -189,7 +189,7 @@ class SudoTicTacToeState(GameState):
         )
 
     def game_result(self) -> int:
-        """Outcome from Player 1's perspective: 1 win, -1 loss, 0 draw/unfinished."""
+        """Outcome based on meta-board: 1 (X win), -1 (O win), 0 (draw/unfinished)."""
         if _is_meta_win(self.board_status, 1):
             return 1
         if _is_meta_win(self.board_status, -1):
