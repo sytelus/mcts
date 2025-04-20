@@ -170,23 +170,60 @@ class SudoTicTacToeState:
     # ------------------------------------------------------------------
 
     def __str__(self) -> str:  # noqa: DunderStr
-        """Pretty printable representation of the 9x9 board."""
-        symbols = {1: "X", -1: "O", 0: "·"}
+        """Pretty printable representation of the 9x9 board with indices."""
+        symbols = {1: "X", -1: "O"}
         rows: List[str] = []
+        separator = "─────┼─────┼─────"  # 17 chars
+        header_template = " B {} │ B {} │ B {} "  # 17 chars
+
         for big_row in range(3):
+            # Add header for the current row of boards
+            rows.append(header_template.format(3 * big_row, 3 * big_row + 1, 3 * big_row + 2))
+            if big_row > 0:
+                # Add separator line above rows 1 and 2
+                rows.insert(-9, separator) # Insert separator before the 9 lines of the previous big_row
+
             for small_row in range(3):
-                row_cells: List[str] = []
+                line_parts: List[str] = []
                 for big_col in range(3):
                     board_idx = 3 * big_row + big_col
-                    start = 3 * small_row
-                    row_cells.extend(
-                        symbols[self.boards[board_idx][start + i]] for i in range(3)
-                    )
-                    if big_col < 2:
-                        row_cells.append("│")
-                rows.append(" ".join(row_cells))
+                    local_board_cells: List[str] = [] # Cells for one local board row
+                    start_cell_idx = 3 * small_row # 0, 3, 6
+                    for i in range(3): # 0, 1, 2
+                        cell_idx = start_cell_idx + i
+                        cell_value = self.boards[board_idx][cell_idx]
+                        local_board_cells.append(symbols.get(cell_value, str(cell_idx)))
+                    # Join the 3 cells for the local board: "0 1 2" (5 chars)
+                    line_parts.append(" ".join(local_board_cells))
+
+                # Join the 3 local board strings with "│": "b0│b1│b2" (5+1+5+1+5=17 chars)
+                rows.append("│".join(line_parts))
+
+        # Add the final separator manually if needed, but the loop structure handles it
+        # Need to fix the separator insertion logic slightly
+        # Let's rebuild the structure more clearly
+
+        rows = [] # Reset rows
+        for big_row in range(3):
+            # Header for boards in this big_row
+            rows.append(header_template.format(3 * big_row, 3 * big_row + 1, 3 * big_row + 2))
+            # Grid rows
+            for small_row in range(3):
+                line_parts = []
+                for big_col in range(3):
+                    board_idx = 3 * big_row + big_col
+                    local_board_cells = []
+                    start_cell_idx = 3 * small_row
+                    for i in range(3):
+                        cell_idx = start_cell_idx + i
+                        cell_value = self.boards[board_idx][cell_idx]
+                        local_board_cells.append(symbols.get(cell_value, str(cell_idx)))
+                    line_parts.append(" ".join(local_board_cells))
+                rows.append("│".join(line_parts))
+            # Separator after each big_row, except the last one
             if big_row < 2:
-                rows.append("──────┼──────┼──────")
+                rows.append(separator)
+
         return "\n".join(rows)
 
     # ------------------------------------------------------------------
@@ -370,7 +407,7 @@ def play_cli() -> None:
             elif result == -1:
                 print("O wins!")
             else:
-                print("It’s a draw.")
+                print("It's a draw.")
             return
 
         if (state.current_player == 1 and human_is_x) or (
