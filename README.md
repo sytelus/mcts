@@ -11,7 +11,7 @@ The core design utilizes abstract base classes (`GameState`, `SearchAlgorithm`) 
   * Sudo / Ultimate Tic-Tac-Toe (9 local 3x3 boards with forced-move rule)
 * **Multiple AI Algorithms:**
   * Monte Carlo Tree Search (MCTS): A probabilistic search algorithm suitable for complex games. Configurable simulation count per game.
-  * Brute-Force Minimax: A deterministic search exploring the game tree (with optional depth limit).
+  * Minimax: A deterministic search exploring the game tree (with optional depth limit).
 * **Command-Line Interface (CLI):**
   * Select which game to play.
   * Select which AI algorithm to play against.
@@ -36,7 +36,7 @@ The core design utilizes abstract base classes (`GameState`, `SearchAlgorithm`) 
 │   ├── __init__.py
 │   ├── search_algorithm.py # Abstract Base Class (ABC) for search algorithms
 │   ├── mcts.py             # MCTS implementation
-│   └── brute_force_search.py # Brute-Force Minimax implementation
+│   └── minimax_search.py   # Minimax implementation (formerly minimax.py)
 └── README.md               # This file
 ```
 
@@ -67,8 +67,8 @@ python main.py
 You will be prompted to:
 
 1. **Select Game:** Choose between "Standard Tic-Tac-Toe" and "Sudo Tic-Tac-Toe".
-2. **Select AI Algorithm:** Choose between "MCTS" and "BruteForce (Minimax)".
-    * If you choose BruteForce, you can optionally specify a maximum search depth. Higher depths are stronger but much slower, especially for Sudo Tic-Tac-Toe.
+2. **Select AI Algorithm:** Choose between "MCTS" and "Minimax".
+    * If you choose Minimax, you can optionally specify a maximum search depth. Higher depths are stronger but much slower, especially for Sudo Tic-Tac-Toe.
 3. **Choose Player:** Decide if you want to play as 'X' (Player 1, starts first) or 'O' (Player 2).
 4. **Play:**
     * The current board state will be displayed.

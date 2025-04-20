@@ -14,7 +14,7 @@ from games.sudo_tic_tac_toe import SudoTicTacToeState # Sudo game
 
 from algorithms.search_algorithm import SearchAlgorithm # Base class for search
 from algorithms.mcts import MCTSAlgorithm              # MCTS implementation
-from algorithms.brute_force_search import BruteForceSearch # BruteForce implementation
+from algorithms.minimax_search import MinimaxSearch # Updated import path
 
 # SIMULATIONS_PER_MOVE = 400 # REMOVED - Now defined per game state class
 
@@ -29,7 +29,7 @@ AVAILABLE_GAMES: Dict[str, Type[GameState]] = {
 # Uses imported classes from the algorithms package
 AVAILABLE_ALGORITHMS: Dict[str, Type[SearchAlgorithm]] = {
     "MCTS": MCTSAlgorithm,
-    "BruteForce (Minimax)": BruteForceSearch
+    "Minimax": MinimaxSearch # Value is already correct
 }
 
 def _prompt_human_move(state: GameState) -> Tuple:
@@ -118,8 +118,7 @@ def play_cli() -> None:
         # MCTSAlgorithm will use the simulations_per_move from the GameState class by default if not passed
         # We pass it explicitly here based on the selected game
         algo_params['simulations_per_move'] = GameStateClass.simulations_per_move
-    elif AlgorithmClass is BruteForceSearch:
-        # Example: Ask for depth for BruteForce
+    elif AlgorithmClass is MinimaxSearch: # Updated check
         try:
             depth_str = input("Enter max search depth for Minimax (e.g., 4, or leave blank for default): ").strip()
             if depth_str:

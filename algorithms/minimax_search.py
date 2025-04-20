@@ -5,15 +5,16 @@ from typing import Tuple, Optional, Dict
 from games.game_state import GameState
 from .search_algorithm import SearchAlgorithm
 
-class BruteForceSearch(SearchAlgorithm):
-    """Brute-force minimax search algorithm.
+class MinimaxSearch(SearchAlgorithm): # Renamed class
+    """Minimax search algorithm.
 
     Explores the game tree to a specified depth or until terminal states
     are reached, choosing the move with the best guaranteed outcome.
+    Uses alpha-beta pruning implicitly through standard minimax recursion.
     """
 
     def __init__(self, max_depth: Optional[int] = None, **kwargs) -> None:
-        """Initialize BruteForceSearch with an optional maximum search depth."""
+        """Initialize MinimaxSearch with an optional maximum search depth."""
         super().__init__(**kwargs)
         self.max_depth = max_depth if max_depth is not None else float('inf')
         if self.max_depth <= 0:
@@ -53,7 +54,7 @@ class BruteForceSearch(SearchAlgorithm):
 
         if best_action is None:
              # Fallback if no move improves the initial best_score (e.g., all moves lead to loss)
-             print("Warning: BruteForceSearch returning first available action (no optimal found).", file=sys.stderr)
+             print("Warning: MinimaxSearch returning first available action (no optimal found).", file=sys.stderr)
              return available_actions[0]
 
         return best_action
