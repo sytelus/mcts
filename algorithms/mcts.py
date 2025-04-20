@@ -27,6 +27,7 @@ class MonteCarloTreeSearchNode:
         self._untried_actions: Optional[List[Tuple]] = None
 
     def get_untried_actions(self) -> List[Tuple]:
+        # cache the available actions, pop them one by one as the evaluation progresses
         if self._untried_actions is None:
             self._untried_actions = self.state.available_actions()
         return self._untried_actions
