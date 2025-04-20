@@ -15,7 +15,7 @@ from sudo_tic_tac_toe import SudoTicTacToeState, SudoAction # Import Sudo TicTac
 # Generic Action type bound for local use
 Action = TypeVar('Action')
 
-SIMULATIONS_PER_MOVE = 400 # MCTS simulation budget
+# SIMULATIONS_PER_MOVE = 400 # REMOVED - Now defined per game state class
 
 # --- Game Registry --- #
 # Discovered game state classes are registered here.
@@ -117,7 +117,9 @@ def play_cli() -> None:
             # MCTS node infers Action type from state
             root = MonteCarloTreeSearchNode(state=state)
             try:
-                action = root.best_action(simulations_number=SIMULATIONS_PER_MOVE)
+                # Get simulation count from the current state's class variable
+                num_sims = state.simulations_per_move
+                action = root.best_action(simulations_number=num_sims)
                 print(f"AI plays {state.action_to_string(action)}")
             except (RuntimeError, ValueError) as e:
                  print(f"\nError during AI move: {e}")

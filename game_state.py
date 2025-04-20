@@ -15,6 +15,7 @@ class GameState(ABC, Generic[Action]):
     # Use a class variable for the game title
     # Subclasses MUST override this.
     game_title: str = "Abstract Game (Please Override)"
+    simulations_per_move: int = 200 # Default MCTS simulations per move
 
     @property
     @abstractmethod

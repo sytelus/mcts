@@ -75,6 +75,7 @@ class SudoTicTacToeState(GameState[SudoAction]):
 
     # --- GameState required class variables ---
     game_title: str = "Sudo Tic-Tac-Toe"
+    simulations_per_move: int = 400 # Keep higher value for complex Sudo
 
     # --- Instance variables ---
     boards: List[List[int]]

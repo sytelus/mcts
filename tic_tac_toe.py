@@ -20,6 +20,7 @@ class TicTacToeState(GameState[TttAction]):
 
     # --- GameState required class variables ---
     game_title: str = "Standard Tic-Tac-Toe"
+    simulations_per_move: int = 100 # Fewer needed for simple TTT
 
     # --- Instance variables ---
     board: List[int]  # 0: empty, 1: X, -1: O
