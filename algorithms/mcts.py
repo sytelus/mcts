@@ -165,6 +165,7 @@ class MonteCarloTreeSearchNode:
              return available_actions[0]
 
         # Select the child node corresponding to the most visited action
+        # note that we use robust child criterion for the best node after simulations instead of UCB
         best = max(self.children, key=lambda node: node.n())
         if best.parent_action is None:
             # This should be impossible if the node is a child created by expand()
